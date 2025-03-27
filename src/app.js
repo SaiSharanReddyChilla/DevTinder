@@ -4,22 +4,36 @@ const app = express();
 
 const portNo = 7777;
 
-app.use("/test", (req, res) =>
-  res.send("Great going, you've arrived at test route")
-);
-
-app.use("/hello", (req, res) =>
-  res.send("Oh oh, you walked your way to greet Hello!")
-);
-
-app.use("/bye", (req, res) =>
-  res.send("Awesome, you've finally arrived to say GoodBye!")
-);
-
-app.use("/", (req, res) => {
-  const responseText = "Hurray! Welcome to GoingNuts Dashboard...";
-  res.send(responseText);
+app.get("/user", (req, res) => {
+  // Fetch from DB
+  res.send({ name: "SAI", age: 29 });
 });
+
+app.post("/user", (req, res) => {
+  // Save to DB
+  res.send("User added successfully");
+});
+
+app.put("/user", (req, res) => {
+  // Update to DB
+  res.send("User updated successfully");
+});
+
+app.patch("/user", (req, res) => {
+  // Partial update to DB
+  res.send("User updated successfully");
+});
+
+app.delete("/user", (req, res) => {
+  // Delete from DB
+  res.send("User deleted successfully");
+});
+
+app.use("/test", (req, res) =>
+  res.send(
+    "Great going, you've arrived at test route handled by express server"
+  )
+);
 
 app.listen(portNo, () => {
   console.log("Server successfully Up and Running on Port No: ", portNo);
