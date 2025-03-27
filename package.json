@@ -1,0 +1,27 @@
+{
+  "name": "goingnuts",
+  "version": "1.0.0",
+  "description": "Hub for connecting like minded developers",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app"
+  },
+  "keywords": [
+    "node.js",
+    "express.js",
+    "mongoDB",
+    "javascript",
+    "react",
+    "html",
+    "css",
+    "redux",
+    "redux",
+    "toolkit"
+  ],
+  "author": "Sai Sharan Reddy",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
