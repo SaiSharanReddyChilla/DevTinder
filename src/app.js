@@ -14,7 +14,7 @@ app.use("/admin", adminAuth);
 // });
 
 // Case where custom authentication is not required
-app.post("/user/login", (req, res) => res.send("Successfully Logged In"))
+app.post("/user/login", (req, res) => res.send("Successfully Logged In"));
 
 // Passing series of middlewares handled against a single route (concise syntax to above version)
 app.get("/user", userAuth, (req, res) => res.send("User Data Returned"));
