@@ -27,6 +27,20 @@ app.get("/admin/deleteData", (req, res) => {
   res.send("Deleted Data");
 });
 
+app.get("/getUserData", (req, res) => {
+  // try {
+    throw new Error("Something went wrong, please try again later.");
+  // } catch (err) {
+  // res.status(500).send(err?.message);
+  // }
+});
+
+app.use("/", (err, req, res, next) => {
+  if (err) {
+    res.status(500).send("Something went wrong, Please try again.");
+  }
+});
+
 app.listen(portNo, () => {
   console.log("Server successfully Up and Running on Port No: ", portNo);
 });
