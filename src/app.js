@@ -6,22 +6,17 @@ const app = express();
 
 const portNo = 7777;
 
-app.post("/signup", async (req, res) => {
-  const userObj = {
-    firstName: "Ravi",
-    lastName: "Ashwin",
-    email: "ravi.ashwin@gmail.com",
-    password: "ravi@csk@123",
-  };
+app.use(express.json());
 
+app.post("/signup", async (req, res) => {
   try {
     // Create a new Instance of the User Model
-    const user = new User(userObj);
+    const user = new User(req.body);
     // Call the save method to save the document to user collection, note that the save method returns a prmoise
     await user.save();
     res.send("User Added Successfully!");
   } catch (err) {
-    res.status(400).send("Error Adding User: ", err?.message);
+    res.status(400).send("Error Adding User: " + err?.message);
   }
 });
 
