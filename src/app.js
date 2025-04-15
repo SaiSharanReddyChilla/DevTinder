@@ -1,46 +1,44 @@
 const express = require("express");
-const { adminAuth, userAuth } = require("./middlewares/auth");
+const { connectDB } = require("./config/database");
+const User = require("./models/user");
 
 const app = express();
 
 const portNo = 7777;
 
-app.use("/admin", adminAuth);
+app.post("/signup", async (req, res) => {
+  const userObj = {
+    firstName: "Ravi",
+    lastName: "Ashwin",
+    email: "ravi.ashwin@gmail.com",
+    password: "ravi@csk@123",
+  };
 
-// app.get("/user", userAuth);
-
-// app.get("/user", (req, res) => {
-//   res.send("User Data Returned");
-// });
-
-// Case where custom authentication is not required
-app.post("/user/login", (req, res) => res.send("Successfully Logged In"));
-
-// Passing series of middlewares handled against a single route (concise syntax to above version)
-app.get("/user", userAuth, (req, res) => res.send("User Data Returned"));
-
-app.get("/admin/allData", (req, res) => {
-  res.send("All Data Returned");
-});
-
-app.get("/admin/deleteData", (req, res) => {
-  res.send("Deleted Data");
-});
-
-app.get("/getUserData", (req, res) => {
-  // try {
-    throw new Error("Something went wrong, please try again later.");
-  // } catch (err) {
-  // res.status(500).send(err?.message);
-  // }
+  try {
+    // Create a new Instance of the User Model
+    const user = new User(userObj);
+    // Call the save method to save the document to user collection, note that the save method returns a prmoise
+    await user.save();
+    res.send("User Added Successfully!");
+  } catch (err) {
+    res.status(400).send("Error Adding User: ", err?.message);
+  }
 });
 
 app.use("/", (err, req, res, next) => {
   if (err) {
-    res.status(500).send("Something went wrong, Please try again.");
+    console.log("error", err);
+    res.send(err?.message);
   }
 });
 
-app.listen(portNo, () => {
-  console.log("Server successfully Up and Running on Port No: ", portNo);
-});
+connectDB()
+  .then((res) => {
+    console.log("DB connection established successfully");
+    app.listen(portNo, () => {
+      console.log("Server successfully Up and Running on Port No: ", portNo);
+    });
+  })
+  .catch((err) => {
+    console.log("Unable to establish connection to DB at the moment");
+  });
