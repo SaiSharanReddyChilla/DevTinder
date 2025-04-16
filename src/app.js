@@ -54,13 +54,36 @@ app.delete("/user", async (req, res) => {
 });
 
 // UPDATE API to update the details of an user
-app.patch("/user", async (req, res) => {
+app.patch("/user/:userId", async (req, res) => {
   try {
-    const userId = req.body.userId;
+    const userId = req?.params?.userId;
     const data = req.body;
+
+    const ALLOWED_UPDATES = [
+      "lastName",
+      "password",
+      "gender",
+      "age",
+      "about",
+      "skills",
+      "photoUrl",
+    ];
+
+    const isUpdateAllowed = Object.keys(data).every((key) =>
+      ALLOWED_UPDATES.includes(key)
+    );
+
+    if (!isUpdateAllowed) {
+      throw new Error("Update Not Allowed");
+    }
+
+    if (data?.skills?.length > 0) {
+      throw new Error("Skills cannot exceed 10");
+    }
+
     const user = await User.findByIdAndUpdate(userId, data, {
       returnDocument: "before",
-      runValidators: true
+      runValidators: true,
     });
     console.log("User: ", user);
     res.send("User Details Updated Successfully");
@@ -85,6 +108,9 @@ app.post("/signup", async (req, res) => {
   try {
     // Create a new Instance of the User Model
     const user = new User(req.body);
+    if (user?.skills && user?.skills?.length > 10) {
+      throw new Error("Skills cannot exceed 10");
+    }
     // Call the save method to save the document to user collection, note that the save method returns a prmoise
     await user.save();
     res.send("User Added Successfully!");
