@@ -14,7 +14,6 @@ app.use(express.json());
 // GET API to fetch users by email
 app.get("/users", async (req, res) => {
   try {
-    console.log("email", req.body.email);
     const users = await User.find({ email: req.body.email });
     if (users?.length > 0) {
       res.send(users);
@@ -31,7 +30,6 @@ app.get("/users", async (req, res) => {
 app.get("/user", async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
-    console.log("user", user);
     if (user) {
       res.send(user);
     } else {
@@ -87,7 +85,6 @@ app.patch("/user/:userId", async (req, res) => {
       returnDocument: "before",
       runValidators: true,
     });
-    console.log("User: ", user);
     res.send("User Details Updated Successfully");
   } catch (err) {
     console.log("ERROR: ", err?.message);
@@ -143,7 +140,6 @@ app.post("/login", async (req, res) => {
       throw new Error("Invalid Credentials!");
     }
     const isPasswordValid = await bcrypt.compare(password, user?.password);
-    console.log("valid pwd", isPasswordValid)
     if (isPasswordValid) {
       res.send("Login Successful!");
     } else {
@@ -157,7 +153,7 @@ app.post("/login", async (req, res) => {
 // Middleware to catch and and handle errors
 app.use("/", (err, req, res, next) => {
   if (err) {
-    console.log("error", err);
+    console.log("ERROR", err);
     res.send(err?.message);
   }
 });
