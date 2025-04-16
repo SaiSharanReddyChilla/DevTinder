@@ -1,6 +1,8 @@
 const express = require("express");
 const { connectDB } = require("./config/database");
 const User = require("./models/user");
+const { validateSignUpData } = require("./utils/validation");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
@@ -104,14 +106,26 @@ app.get("/feed", async (req, res) => {
   }
 });
 
+// POST API to register a new User
 app.post("/signup", async (req, res) => {
   try {
+    // Validation of data
+    validateSignUpData(req);
+
+    const { firstName, lastName, email, password } = req.body;
+
+    // Encrypt the password using bcrypt library
+    const pwdHash = await bcrypt.hash(password, 10);
+
     // Create a new Instance of the User Model
-    const user = new User(req.body);
-    if (user?.skills && user?.skills?.length > 10) {
-      throw new Error("Skills cannot exceed 10");
-    }
-    // Call the save method to save the document to user collection, note that the save method returns a prmoise
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password: pwdHash,
+    });
+
+    // Call the save method to save the document to user collection
     await user.save();
     res.send("User Added Successfully!");
   } catch (err) {
@@ -120,6 +134,27 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+// POST API to authenticate a User Login
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error("Invalid Credentials!");
+    }
+    const isPasswordValid = await bcrypt.compare(password, user?.password);
+    console.log("valid pwd", isPasswordValid)
+    if (isPasswordValid) {
+      res.send("Login Successful!");
+    } else {
+      throw new Error("Invalid Credentials!");
+    }
+  } catch (err) {
+    res.status(400).send("Error: " + err?.message);
+  }
+});
+
+// Middleware to catch and and handle errors
 app.use("/", (err, req, res, next) => {
   if (err) {
     console.log("error", err);
