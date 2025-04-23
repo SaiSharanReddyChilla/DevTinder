@@ -3,34 +3,30 @@ const validator = require("validator");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-const UserSchema = mongoose.Schema(
+const userSchema = mongoose.Schema(
   {
     firstName: {
       type: String,
       required: true,
       trim: true,
-      minLength: 3,
-      maxLength: 25,
-      validate(value) {
-        if (value?.length < 3 || value?.length > 25) {
-          throw new Error("First Name must be 3 to 25 characters.");
-        }
-      },
+      minLength: 2,
+      maxLength: 50,
     },
     lastName: {
       type: String,
+      required: true,
       trim: true,
-      maxLength: 25,
+      maxLength: 50,
     },
     email: {
       type: String,
       required: true,
       unique: true,
-      lowercase: true,
       trim: true,
+      lowercase: true,
       validate(value) {
         if (!validator.isEmail(value)) {
-          throw new Error("Invalid Email!!!");
+          throw new Error("Invalid email!");
         }
       },
     },
@@ -39,32 +35,33 @@ const UserSchema = mongoose.Schema(
       required: true,
       validate(value) {
         if (!validator.isStrongPassword(value)) {
-          throw new Error("Enter a Strong Password!!!");
-        }
-      },
-    },
-    gender: {
-      type: String,
-      lowercase: true,
-      validate(value) {
-        if (!["male", "female", "others"].includes(value)) {
-          throw new Error("Gended is not valid!");
+          throw new Error("Weak Password!");
         }
       },
     },
     age: {
       type: Number,
       min: 18,
+      max: 60,
+    },
+    gender: {
+      type: String,
+      uppercase: true,
+      enum: {
+        values: ["MALE", "FEMALE", "OTHERS"],
+        message: `{VALUE} is not a valid gender type!`,
+      },
     },
     about: {
       type: String,
-      default: "This is a sample about, feel free to change!",
+      maxLength: 100,
+      default: "This is just a sample about, feel free to change it!",
     },
     skills: {
       type: [String],
       validate(value) {
         if (Array.isArray(value) && value?.length > 10) {
-          throw new Error("Skills must not exceed 10!");
+          throw new Error("Skills cannot exceed 10!");
         }
       },
     },
@@ -84,7 +81,14 @@ const UserSchema = mongoose.Schema(
   }
 );
 
-UserSchema.methods.getJWT = async function () {
+userSchema.methods.validatePassword = async function (req) {
+  const user = this;
+  const { password } = req.body;
+  const isPasswordValid = await bcrypt.compare(password, user?.password);
+  return isPasswordValid;
+};
+
+userSchema.methods.getJWT = async function () {
   const user = this;
   const token = await jwt.sign({ id: user?._id }, "Berlin@26", {
     expiresIn: "7d",
@@ -92,14 +96,7 @@ UserSchema.methods.getJWT = async function () {
   return token;
 };
 
-UserSchema.methods.validatePassword = async function (inputPassword) {
-  const user = this;
-  const passwordHash = user.password;
-  const isPwdValid = await bcrypt.compare(inputPassword, passwordHash);
-  return isPwdValid;
-};
-
-const User = mongoose.model("user", UserSchema);
+const User = mongoose.model("user", userSchema);
 
 module.exports = {
   User,

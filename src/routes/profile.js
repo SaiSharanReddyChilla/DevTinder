@@ -9,22 +9,30 @@ const bcrypt = require("bcrypt");
 const profileRouter = express.Router();
 
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
-  const { user } = req;
-  res.send(user);
+  try {
+    const { user } = req;
+    res.send(user);
+  } catch (err) {
+    res.status(400).send("Error: " + err?.message);
+  }
 });
 
 profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   try {
-    const { allowed, message } = validateProfileUpdatePayload(req);
+    const { isAllowed, message } = validateProfileUpdatePayload(req);
 
-    if (!allowed) {
-      throw new Error(message);
+    if (!isAllowed) {
+      return res.status(400).send(message);
     }
+
     const { user } = req;
+
     Object.keys(req.body).forEach((key) => (user[key] = req.body[key]));
+
     await user.save();
+
     res.json({
-      message: `${user?.firstName}, profile has been updated succesfully!`,
+      message: `${user?.firstName}, your profile is updated succesfully!`,
       data: user,
     });
   } catch (err) {
@@ -36,16 +44,22 @@ profileRouter.patch("/profile/password", userAuth, async (req, res) => {
   try {
     const { valid, message } = await validateProfilePassword(req);
     if (!valid) {
-      throw new Error(message);
+      return res.status(400).send(message);
     }
+
     const { newPassword } = req.body;
+
     const passwordHash = await bcrypt.hash(newPassword, 10);
+
     const { user } = req;
+
     user["password"] = passwordHash;
-    await user.save();
+
+    const data = await user.save();
+
     res.json({
-      message: `${user?.firstName}, profile password updated successfully!`,
-      data: user,
+      message: `${user?.firstName}, your profile password is updated successfully`,
+      data,
     });
   } catch (err) {
     res.status(400).send("Error: " + err?.message);
